@@ -113,7 +113,15 @@ section.active{
   text-transform:uppercase;
   color:var(--muted);}
 
-.hero-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--amber-dim);}
+.hero-meta .dot{
+  display: inline-block; /* ensure it has a box */
+  width: 3px;
+  width:3px;height:3px;
+  border-radius:50%;
+  background:var(--amber-dim);
+  /* z-index: 1;
+  position: relative; */
+}
 .hero-chinese{
   margin-top:1rem;font-family:var(--serif);font-style:italic;
   font-size:1rem;color:var(--amber-dim);letter-spacing:0.2em;
