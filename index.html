@@ -379,7 +379,7 @@ footer em{font-family:var(--serif);font-style:italic;color:var(--amber-dim);}
     <a onclick="show('story')">Story</a>
     <a onclick="show('schedule')">Schedule</a>
     <a onclick="show('travel')">Travel</a>
-    <!-- <a onclick="show('rsvp')">RSVP</a> -->
+    <a onclick="show('rsvp')">RSVP</a>
   </div>
 </nav>
 
@@ -576,7 +576,14 @@ footer em{font-family:var(--serif);font-style:italic;color:var(--amber-dim);}
       </div>
       
       <div class="rsvp-wrap">
-        <div id="rsvp-form">
+        
+        <div id="rsvp-blocked"">
+            <p style="color:var(--muted); font-size:0.85rem;">
+              Please use your personalized RSVP link to respond.
+            </p>
+        </div>
+
+        <div id="rsvp-form" style="display:none;">
           <p style="font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:0.75rem;">Will you be joining us?</p>
           <div class="attend-toggle">
             <button class="attend-opt on" data-val="yes" onclick="setAttend(this,'yes')">Joyfully accepts</button>
@@ -709,18 +716,38 @@ var currentGuest = null;
 function loadGuestFromURL() {
   var params = new URLSearchParams(window.location.search);
   var id = params.get('id');
-  if (!id) return;
+
+  const form = document.getElementById('rsvp-form');
+  const blocked = document.getElementById('rsvp-blocked');
+
+  if (!id) {
+    if (blocked) blocked.style.display = 'block';
+    return;
+  }
+
   fetch('guests.json')
-    .then(function(r){ return r.json(); })
-    .then(function(guests){
+    .then(r => r.json())
+    .then(guests => {
       var g = guests[id];
-      if (!g) return;
-      currentGuest = Object.assign({ id: id }, g);
+
+      if (!g) {
+        if (blocked) blocked.style.display = 'block';
+        return;
+      }
+
+      // ✅ VALID GUEST → SHOW FORM
+      if (form) form.style.display = 'block';
+      if (blocked) blocked.style.display = 'none';
+
+      currentGuest = { id, ...g };
+
       var fn = document.getElementById('rsvp-fname');
       var ln = document.getElementById('rsvp-lname');
       var gc = document.getElementById('rsvp-guests');
+
       if (fn) { fn.value = g.firstName; fn.readOnly = true; fn.style.opacity = '0.6'; }
       if (ln) { ln.value = g.lastName;  ln.readOnly = true; ln.style.opacity = '0.6'; }
+
       if (gc) {
         gc.innerHTML = '';
         var max = g.maxGuests || 1;
@@ -730,9 +757,12 @@ function loadGuestFromURL() {
         }
         if (max === 1) { gc.disabled = true; gc.style.opacity = '0.6'; }
       }
+
       updatePlusOnes();
     })
-    .catch(function(){});
+    .catch(() => {
+      if (blocked) blocked.style.display = 'block';
+    });
 }
 
 function updatePlusOnes() {
