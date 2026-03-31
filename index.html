@@ -373,6 +373,92 @@ footer em{font-family:var(--serif);font-style:italic;color:var(--amber-dim);}
   .field-row{grid-template-columns:1fr;}
   .page-inner{padding:0 1.25rem;}
 }
+
+/* ====== GALLERY ====== */
+.gallery-carousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: #000;
+  margin-top: 2rem;
+}
+.gallery-track {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.gallery-slide {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  background: #000;
+}
+.gallery-slide img {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.gallery-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(13,12,10,0.7);
+  border: 1px solid var(--border);
+  color: var(--amber);
+  font-size: 1.2rem;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gallery-arrow:hover { background: rgba(200,148,58,0.2); }
+.gallery-prev { left: 1.5rem; }
+.gallery-next { right: 1.5rem; }
+.gallery-dots {
+  position: absolute;
+  bottom: 1.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.5rem;
+}
+.gallery-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+  border: none;
+}
+.gallery-dot.active {
+  background: var(--amber);
+  opacity: 1;
+}
+.gallery-counter {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+@media(max-width:600px) {
+  .gallery-arrow { width: 36px; height: 36px; font-size: 1rem; }
+  .gallery-prev { left: 0.75rem; }
+  .gallery-next { right: 0.75rem; }
+}
+
 </style>
 </head>
 <body>
@@ -384,6 +470,7 @@ footer em{font-family:var(--serif);font-style:italic;color:var(--amber-dim);}
     <a onclick="show('story')">Story</a>
     <a onclick="show('schedule')">Schedule</a>
     <a onclick="show('travel')">Travel</a>
+    <a onclick="show('gallery')">Gallery</a>
     <a onclick="show('rsvp')">RSVP</a>
   </div>
 </nav>
@@ -621,6 +708,26 @@ footer em{font-family:var(--serif);font-style:italic;color:var(--amber-dim);}
           <p class="zh">謝謝您！我們期待與您共同慶祝這美好的一天。</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== GALLERY ===== -->
+<section id="gallery">
+  <div class="page">
+    <div class="page-inner">
+      <span class="section-label">Photos</span>
+      <h2 class="section-title">Gallery</h2>
+      <p class="section-zh">相片集</p>
+    </div>
+
+    <!-- Full-width carousel -->
+    <div class="gallery-carousel" id="gallery-carousel">
+      <div class="gallery-track" id="gallery-track"></div>
+      <button class="gallery-arrow gallery-prev" onclick="galleryMove(-1)">&#8592;</button>
+      <button class="gallery-arrow gallery-next" onclick="galleryMove(1)">&#8594;</button>
+      <div class="gallery-dots" id="gallery-dots"></div>
+      <div class="gallery-counter" id="gallery-counter"></div>
     </div>
   </div>
 </section>
@@ -900,6 +1007,87 @@ window.addEventListener('DOMContentLoaded', function(){
       observer.observe(el);
     });
 
+
+
+});
+
+// ====== GALLERY ======
+const GALLERY_IMAGES = [
+  "images/hero1.jpg","images/hero2.jpg","images/hero3.jpg",
+  "images/hero4.jpg","images/hero5.jpg",
+  "images/story1.jpg","images/story2.jpg","images/story3.jpg",
+  "images/other1.jpg","images/other2.jpg","images/other3.jpg",
+  "images/other4.jpg",
+  "images/travel.jpg"
+];
+
+let galleryIndex = 0;
+
+function buildGallery() {
+  const track = document.getElementById('gallery-track');
+  const dots  = document.getElementById('gallery-dots');
+  if (!track) return;
+
+  GALLERY_IMAGES.forEach((src, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'gallery-slide';
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = '';
+    slide.appendChild(img);
+    track.appendChild(slide);
+
+    const dot = document.createElement('button');
+    dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+    dot.onclick = () => galleryGoTo(i);
+    dots.appendChild(dot);
+  });
+
+  updateGallery();
+}
+
+function galleryGoTo(i) {
+  galleryIndex = (i + GALLERY_IMAGES.length) % GALLERY_IMAGES.length;
+  updateGallery();
+}
+
+function galleryMove(dir) {
+  galleryGoTo(galleryIndex + dir);
+}
+
+function updateGallery() {
+  document.getElementById('gallery-track').style.transform =
+    `translateX(-${galleryIndex * 100}%)`;
+  document.querySelectorAll('.gallery-dot').forEach((d, i) =>
+    d.classList.toggle('active', i === galleryIndex));
+  document.getElementById('gallery-counter').textContent =
+    `${galleryIndex + 1} / ${GALLERY_IMAGES.length}`;
+}
+
+// Arrow key support in gallery
+document.addEventListener('keydown', (e) => {
+  const gallerySection = document.getElementById('gallery');
+  if (!gallerySection || !gallerySection.classList.contains('active')) return;
+  if (e.key === 'ArrowRight') galleryMove(1);
+  if (e.key === 'ArrowLeft')  galleryMove(-1);
+});
+
+// Touch/swipe support
+(function() {
+  let startX = 0;
+  document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - startX;
+    const gallery = document.getElementById('gallery');
+    if (!gallery || !gallery.classList.contains('active')) return;
+    if (Math.abs(dx) > 40) galleryMove(dx < 0 ? 1 : -1);
+  });
+})();
+
+// Build on load
+window.addEventListener('DOMContentLoaded', function() {
+  buildGallery();
+  // ... (your existing DOMContentLoaded code continues)
 });
 
 </script>
