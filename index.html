@@ -156,7 +156,7 @@ section.active{display:block;}
 .section-image img{
   max-width:720px;max-height:420px;
   object-fit:cover;object-position:center 40%;
-  filter:brightness(0.75) saturate(0.8);
+  /* filter:brightness(0.75) saturate(0.8); */
   border:1px solid var(--border);
 }
 
@@ -248,6 +248,29 @@ footer em{font-family:var(--serif);font-style:italic;color:var(--amber-dim);}
 .footer-credit a:hover {
   color: var(--amber);
 }
+
+/* ====== PHOTO CREDIT ====== */
+
+p.photo-credit {
+  padding:1rem;text-align:center;
+  font-size:0.75rem;
+  letter-spacing:0.05em;
+  text-transform:none;
+  color: var(--muted);
+  margin-top: 1rem;
+}
+
+
+p.photo-credit a {
+  /* color: var(--amber-dim); */
+  color: var(--muted);
+  text-decoration: none;
+}
+
+p.photo-credit a:hover {
+  color: var(--amber);
+}
+
 
 /* ====== COUNTDOWN ====== */
 .hero-countdown{
@@ -603,12 +626,14 @@ footer em{font-family:var(--serif);font-style:italic;color:var(--amber-dim);}
       <p class="section-zh">相片集</p>
       <div class="photos-carousel">
         <div class="photos-main" id="photos-main"></div>
+        
         <div class="photos-nav">
           <button onclick="photosNav(-1)">&#8592;</button>
           <span class="photos-counter" id="photos-counter">1 / 16</span>
-          <button onclick="photosNav(1)">&#8594;</button>
+          <button onclick="photosNav(1)">&#8594;</button>    
         </div>
         <div class="photos-thumbs" id="photos-thumbs"></div>
+        <p class="photo-credit">Photos by <a href="https://www.instagram.com/abc.photographyhk/" target="_blank">ABC Photography Hong Kong</a></p>
       </div>
     </div>
   </div>
